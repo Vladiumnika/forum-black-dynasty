@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Регистрация | Black Dynasty</title>
+  <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+  <script src="https://www.google.com/recaptcha/api.js" async defer></script>
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+        <h1>Black Dynasty Forum</h1>
+      </div>
+      <nav>
+        <a href="index.html" class="nav-link">Главная</a>
+        <a href="login.html" class="nav-link">Войти</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-container">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <h2 style="background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2rem; margin-bottom: 0.5rem;">Создание аккаунта</h2>
+        <p style="color: #cbd5e1;">Присоединяйтесь к сообществу Black Dynasty</p>
+      </div>
+
+      <form id="registerForm">
+        <div class="form-group">
+          <label for="username">Имя пользователя</label>
+          <input type="text" id="username" required placeholder="Введите имя пользователя">
+        </div>
+        
+        <div class="form-group">
+          <label for="email">Email адрес</label>
+          <input type="email" id="email" required placeholder="Введите ваш email">
+        </div>
+        
+        <div class="form-group">
+          <label for="password">Пароль</label>
+          <input type="password" id="password" required placeholder="Создайте надежный пароль">
+        </div>
+        
+        <div class="g-recaptcha" data-sitekey="6Le_3fYrAAAAAIBdaJgYn9n4NvCQ1k1IxmTsPVUM" data-callback="onRecaptchaSuccess" data-expired-callback="onRecaptchaExpired"></div>
+        
+        <button type="submit" class="btn" style="width: 100%; margin-top: 1rem;">
+          Создать аккаунт
+        </button>
+      </form>
+
+      <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <p style="color: #cbd5e1; margin-bottom: 1rem;">Уже есть аккаунт?</p>
+        <a href="login.html" class="btn btn-secondary" style="text-decoration: none; display: inline-block;">
+          Войти в аккаунт
+        </a>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/auth.js"></script>
+</body>
+</html>

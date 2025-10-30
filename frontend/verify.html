@@ -1,0 +1,154 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Подтверждение аккаунта | Black Dynasty</title>
+    <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <header>
+        <div class="header-content">
+            <div class="logo-container">
+                <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+                <h1>Black Dynasty Forum</h1>
+            </div>
+            <nav>
+                <a href="index.html" class="nav-link">Главная</a>
+                <a href="login.html" class="nav-link">Войти</a>
+                <a href="register.html" class="nav-link">Регистрация</a>
+            </nav>
+        </div>
+    </header>
+
+    <main>
+        <div class="verify-container card">
+            <div id="verification-content">
+                <div style="text-align: center; margin-bottom: 2rem;">
+                    <div id="status-icon" style="width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem;">⏳</div>
+                    <h2 id="status-title">Проверка токена...</h2>
+                    <p id="status-message" style="color: #cbd5e1; font-size: 1.125rem; margin-bottom: 2rem;">
+                        Пожалуйста, подождите, мы проверяем ваш токен верификации.
+                    </p>
+                </div>
+                
+                <div id="action-buttons" class="buttons" style="display: none;">
+                    <a href="login.html" class="btn">Войти в аккаунт</a>
+                    <a href="index.html" class="btn btn-secondary">На главную</a>
+                </div>
+                
+                <div id="resend-section" style="display: none; text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+                    <p style="color: #cbd5e1; margin-bottom: 1rem;">Не получили письмо?</p>
+                    <form id="resend-form">
+                        <input type="email" id="resend-email" placeholder="Введите ваш email" required style="margin-bottom: 1rem;">
+                        <button type="submit" class="btn btn-secondary">Отправить повторно</button>
+                    </form>
+                    <div style="margin-top:1rem; color:#cbd5e1; font-size:0.9rem;">
+                        Забыли пароль? <a href="reset.html" class="nav-link" style="color:#6366f1;">Сбросить</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+        document.addEventListener('DOMContentLoaded', async () => {
+            const urlParams = new URLSearchParams(window.location.search);
+            const token = urlParams.get('token');
+            
+            const statusIcon = document.getElementById('status-icon');
+            const statusTitle = document.getElementById('status-title');
+            const statusMessage = document.getElementById('status-message');
+            const actionButtons = document.getElementById('action-buttons');
+            const resendSection = document.getElementById('resend-section');
+            
+            if (!token) {
+                // Нет токена - показываем форму для повторной отправки
+                statusIcon.innerHTML = '📧';
+                statusIcon.style.background = 'linear-gradient(135deg, #f59e0b, #10b981)';
+                statusTitle.textContent = 'Подтверждение email';
+                statusMessage.innerHTML = 'Для подтверждения email перейдите по ссылке из письма или запросите новое письмо.';
+                resendSection.style.display = 'block';
+            } else {
+                // Есть токен - проверяем его
+                try {
+                    const response = await fetch(api(`/api/auth/verify/${token}`), {
+                        method: 'GET',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        }
+                    });
+                    
+                    const result = await response.json();
+                    
+                    if (response.ok && result.success) {
+                        // Успешная верификация
+                        statusIcon.innerHTML = '✓';
+                        statusIcon.style.background = 'linear-gradient(135deg, #10b981, #059669)';
+                        statusTitle.textContent = 'Аккаунт успешно подтвержден!';
+                        statusMessage.innerHTML = 'Поздравляем! Ваш аккаунт был успешно подтвержден. Теперь вы можете войти в систему и начать пользоваться всеми возможностями форума.';
+                        actionButtons.style.display = 'flex';
+                    } else {
+                        // Ошибка верификации
+                        statusIcon.innerHTML = '❌';
+                        statusIcon.style.background = 'linear-gradient(135deg, #ef4444, #dc2626)';
+                        statusTitle.textContent = 'Ошибка подтверждения';
+                        statusMessage.innerHTML = result.message || 'Недействительный или истекший токен верификации.';
+                        resendSection.style.display = 'block';
+                    }
+                } catch (error) {
+                    // Ошибка сети
+                    statusIcon.innerHTML = '⚠️';
+                    statusIcon.style.background = 'linear-gradient(135deg, #f59e0b, #d97706)';
+                    statusTitle.textContent = 'Ошибка подключения';
+                    statusMessage.innerHTML = 'Не удалось подключиться к серверу. Проверьте ваше интернет-соединение и попробуйте снова.';
+                    resendSection.style.display = 'block';
+                }
+            }
+            
+            // Обработка формы повторной отправки
+            const resendForm = document.getElementById('resend-form');
+            if (resendForm) {
+                resendForm.addEventListener('submit', async (e) => {
+                    e.preventDefault();
+                    
+                    const email = document.getElementById('resend-email').value;
+                    const submitButton = resendForm.querySelector('button[type="submit"]');
+                    const originalText = submitButton.innerHTML;
+                    
+                    submitButton.innerHTML = '⏳ Отправка...';
+                    submitButton.disabled = true;
+                    
+                    try {
+                        const response = await fetch(api('/api/auth/resend-verification'), {
+                            method: 'POST',
+                            headers: {
+                                'Content-Type': 'application/json',
+                            },
+                            body: JSON.stringify({ email })
+                        });
+                        
+                        const result = await response.json();
+                        
+                        if (response.ok && result.success) {
+                            statusMessage.innerHTML = '✅ Email верификации отправлен повторно! Проверьте вашу почту.';
+                            resendForm.style.display = 'none';
+                        } else {
+                            statusMessage.innerHTML = `❌ ${result.message || 'Ошибка отправки email'}`;
+                        }
+                    } catch (error) {
+                        statusMessage.innerHTML = '❌ Ошибка подключения к серверу';
+                    } finally {
+                        submitButton.innerHTML = originalText;
+                        submitButton.disabled = false;
+                    }
+                });
+            }
+        });
+    </script>
+</body>
+</html>

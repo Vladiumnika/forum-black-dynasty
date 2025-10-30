@@ -1,0 +1,107 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Сброс пароля | Black Dynasty</title>
+    <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+    <link rel="stylesheet" href="assets/css/style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+    <style>
+      .hint{color:#cbd5e1;margin-top:0.5rem;font-size:0.9rem}
+    </style>
+  </head>
+  <body>
+    <header>
+      <div class="header-content">
+        <div class="logo-container">
+          <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54Q&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+          <h1>Black Dynasty Forum</h1>
+        </div>
+        <nav>
+          <a href="index.html" class="nav-link">Главная</a>
+          <a href="login.html" class="nav-link">Войти</a>
+          <a href="register.html" class="nav-link">Регистрация</a>
+        </nav>
+      </div>
+    </header>
+
+    <main>
+      <div class="form-container">
+        <div style="text-align:center;margin-bottom:2rem;">
+          <h2 style="background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2rem; margin-bottom: 0.5rem;">Сброс пароля</h2>
+          <p style="color:#cbd5e1;">Введите email для письма или новый пароль по токену</p>
+        </div>
+
+        <div id="request-block">
+          <form id="forgotForm">
+            <div class="form-group">
+              <label for="fp-email">Email адрес</label>
+              <input type="email" id="fp-email" placeholder="Введите ваш email">
+            </div>
+            <button type="submit" class="btn" style="width:100%">Отправить ссылку</button>
+          </form>
+          <p class="hint">Мы пришлём ссылку для сброса пароля, действительную 1 час.</p>
+        </div>
+
+        <div id="reset-block" style="display:none; margin-top:2rem; padding-top:1rem; border-top:1px solid rgba(255,255,255,0.1)">
+          <form id="resetForm">
+            <div class="form-group">
+              <label for="new-password">Новый пароль</label>
+              <input type="password" id="new-password" placeholder="Минимум 6 символов">
+            </div>
+            <button type="submit" class="btn" style="width:100%">Обновить пароль</button>
+          </form>
+        </div>
+      </div>
+    </main>
+
+    <script src="js/config.js"></script>
+    <script src="js/main.js"></script>
+    <script>
+      function notify(msg, type='success'){
+        const n=document.createElement('div');
+        n.className='message '+type; n.style.position='fixed'; n.style.top='20px'; n.style.right='20px'; n.style.zIndex='1000'; n.innerHTML=msg; document.body.appendChild(n);
+        setTimeout(()=>n.remove(), 4000);
+      }
+      const params = new URLSearchParams(window.location.search);
+      const token = params.get('token');
+      const requestBlock = document.getElementById('request-block');
+      const resetBlock = document.getElementById('reset-block');
+      if (token) { requestBlock.style.display='none'; resetBlock.style.display='block'; }
+
+      const forgotForm = document.getElementById('forgotForm');
+      if (forgotForm) {
+        forgotForm.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const email = document.getElementById('fp-email').value;
+          try{
+            const res = await fetch(api('/api/auth/forgot-password'),{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ email })});
+            await res.json();
+            notify('Если email существует, письмо отправлено. Проверьте почту.','success');
+          }catch{ notify('Ошибка отправки письма','error'); }
+        });
+      }
+
+      const resetForm = document.getElementById('resetForm');
+      if (resetForm) {
+        resetForm.addEventListener('submit', async (e)=>{
+          e.preventDefault();
+          const password = document.getElementById('new-password').value;
+          if (!password || password.length < 6) { notify('Пароль слишком короткий','error'); return; }
+          try{
+            const res = await fetch(api('/api/auth/reset-password'),{method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ token, password })});
+            const result = await res.json();
+            if (res.ok && result.success){
+              notify('Пароль обновлён. Войдите с новым паролем.','success');
+              setTimeout(()=>window.location.href='login.html',1500);
+            } else {
+              notify(result.message||'Ошибка сброса','error');
+            }
+          }catch{ notify('Ошибка сети','error'); }
+        });
+      }
+    </script>
+  </body>
+</html>
+

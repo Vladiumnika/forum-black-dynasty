@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Профиль | Black Dynasty</title>
+  <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+        <h1>Black Dynasty Forum</h1>
+      </div>
+      <nav>
+        <a href="index.html" class="nav-link">Главная</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="form-container" style="max-width:600px;">
+      <div style="text-align:center; margin-bottom: 1.5rem;">
+        <h2 style="background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text; font-size: 2rem; margin-bottom: 0.5rem;">Мой профиль</h2>
+        <p style="color:#cbd5e1;">Обновите аватар и описание</p>
+      </div>
+      <div id="profile-card" class="card" style="margin-bottom:1rem; display:none;"></div>
+      <form id="profileForm">
+        <div class="form-group">
+          <label for="avatarUrl">URL аватара</label>
+          <input type="text" id="avatarUrl" placeholder="https://...">
+        </div>
+        <div class="form-group">
+          <label for="bio">О себе</label>
+          <textarea id="bio" rows="4" placeholder="Кто вы и чем занимаетесь?"></textarea>
+        </div>
+        <button type="submit" class="btn" style="width:100%">Сохранить</button>
+      </form>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const token = localStorage.getItem('jwt');
+    if (!token) { window.location.href = 'login.html'; }
+    const card = document.getElementById('profile-card');
+    const form = document.getElementById('profileForm');
+    async function loadMe(){
+      try {
+        const res = await fetch(api('/api/users/me'), { headers: { 'Authorization': `Bearer ${token}` } });
+        const me = await res.json();
+        if (res.ok) {
+          card.style.display = 'block';
+          card.innerHTML = `<div style="display:flex; gap:1rem; align-items:center;">
+            <img src="${(me.avatarUrl||'').replace(/"/g,'')}" onerror="this.src='https://via.placeholder.com/80'" style="width:80px;height:80px;border-radius:50%;object-fit:cover;border:1px solid rgba(255,255,255,.1)"/>
+            <div>
+              <div style="font-weight:600; font-size:1.125rem">${me.username}</div>
+              <div style="color:#cbd5e1">${me.email}</div>
+              <div style="color:#64748b">Роль: ${me.role}</div>
+            </div>
+          </div>`;
+          document.getElementById('avatarUrl').value = me.avatarUrl||'';
+          document.getElementById('bio').value = me.bio||'';
+        }
+      } catch {}
+    }
+    loadMe();
+    if (form) {
+      form.addEventListener('submit', async (e)=>{
+        e.preventDefault();
+        const avatarUrl = document.getElementById('avatarUrl').value.trim();
+        const bio = document.getElementById('bio').value.trim();
+        try{
+          const res = await fetch(api('/api/users/me'), { method:'PUT', headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ avatarUrl, bio })});
+          const data = await res.json();
+          if (res.ok) { loadMe(); alert('Профиль обновлен'); } else { alert(data.message||'Ошибка обновления'); }
+        }catch(_){ alert('Ошибка сети'); }
+      });
+    }
+  </script>
+</body>
+</html>
+

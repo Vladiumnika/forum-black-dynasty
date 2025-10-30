@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Подтверждение | Black Dynasty</title>
+  <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+        <h1>Black Dynasty Forum</h1>
+      </div>
+      <nav>
+        <a href="index.html" class="nav-link">Главная</a>
+        <a href="login.html" class="nav-link">Войти</a>
+        <a href="register.html" class="nav-link">Регистрация</a>
+      </nav>
+    </div>
+  </header>
+  
+  <main>
+    <div class="verify-container card">
+      <div style="text-align: center; margin-bottom: 2rem;">
+        <div style="width: 80px; height: 80px; background: linear-gradient(135deg, #6366f1, #4f46e5); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin: 0 auto 1.5rem; font-size: 2rem;">📧</div>
+        <h2>Проверьте вашу почту</h2>
+        <p style="color: #cbd5e1; font-size: 1.125rem; margin-bottom: 2rem; line-height: 1.6;">
+          На ваш email адрес было отправлено письмо с ссылкой для подтверждения аккаунта. 
+          Пожалуйста, проверьте почту (включая папку "Спам") и перейдите по ссылке для завершения регистрации.
+        </p>
+        <div style="background: rgba(99, 102, 241, 0.1); border: 1px solid rgba(99, 102, 241, 0.3); border-radius: 0.75rem; padding: 1rem; margin-bottom: 2rem;">
+          <p style="color: #6366f1; margin: 0; font-weight: 500;">💡 Не получили письмо? Проверьте папку "Спам" или запросите новое письмо.</p>
+        </div>
+      </div>
+      
+      <div style="text-align: center; margin-top: 2rem; padding-top: 2rem; border-top: 1px solid rgba(255, 255, 255, 0.1);">
+        <p style="color: #cbd5e1; margin-bottom: 1rem;">Не получили письмо?</p>
+        <form id="resend-form" style="margin-bottom: 2rem;">
+          <input type="email" id="resend-email" placeholder="Введите ваш email" required style="margin-bottom: 1rem; width: 100%; max-width: 300px;">
+          <button type="submit" class="btn btn-secondary">Отправить повторно</button>
+        </form>
+        <div id="resend-message" style="display: none; margin-bottom: 1rem;"></div>
+      </div>
+      
+      <div class="buttons">
+        <a href="register.html" class="btn btn-secondary">Попробовать снова</a>
+        <a href="index.html" class="btn">На главную</a>
+      </div>
+    </div>
+  </main>
+
+  <script>
+    document.addEventListener('DOMContentLoaded', () => {
+      const resendForm = document.getElementById('resend-form');
+      const resendMessage = document.getElementById('resend-message');
+      
+      resendForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        
+        const email = document.getElementById('resend-email').value;
+        const submitButton = resendForm.querySelector('button[type="submit"]');
+        const originalText = submitButton.innerHTML;
+        
+        submitButton.innerHTML = '⏳ Отправка...';
+        submitButton.disabled = true;
+        resendMessage.style.display = 'none';
+        
+        try {
+          const response = await fetch('/api/auth/resend-verification', {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({ email })
+          });
+          
+          const result = await response.json();
+          
+          if (response.ok && result.success) {
+            resendMessage.innerHTML = '✅ Email верификации отправлен повторно! Проверьте вашу почту.';
+            resendMessage.style.color = '#10b981';
+            resendMessage.style.background = 'rgba(16, 185, 129, 0.1)';
+            resendMessage.style.border = '1px solid rgba(16, 185, 129, 0.3)';
+            resendMessage.style.padding = '1rem';
+            resendMessage.style.borderRadius = '0.5rem';
+            resendForm.style.display = 'none';
+          } else {
+            resendMessage.innerHTML = `❌ ${result.message || 'Ошибка отправки email'}`;
+            resendMessage.style.color = '#ef4444';
+            resendMessage.style.background = 'rgba(239, 68, 68, 0.1)';
+            resendMessage.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+            resendMessage.style.padding = '1rem';
+            resendMessage.style.borderRadius = '0.5rem';
+          }
+        } catch (error) {
+          resendMessage.innerHTML = '❌ Ошибка подключения к серверу';
+          resendMessage.style.color = '#ef4444';
+          resendMessage.style.background = 'rgba(239, 68, 68, 0.1)';
+          resendMessage.style.border = '1px solid rgba(239, 68, 68, 0.3)';
+          resendMessage.style.padding = '1rem';
+          resendMessage.style.borderRadius = '0.5rem';
+        } finally {
+          submitButton.innerHTML = originalText;
+          submitButton.disabled = false;
+          resendMessage.style.display = 'block';
+        }
+      });
+    });
+  </script>
+</body>
+</html>

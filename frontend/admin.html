@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Админ-панель | Black Dynasty</title>
+  <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+        <h1>Админ-панель</h1>
+      </div>
+      <nav>
+        <a href="index.html" class="nav-link">Главная</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <h2 style="margin-bottom:1rem;">Управление категориями</h2>
+      <div id="cat-list" class="topic-list" style="margin-bottom:1rem;"></div>
+      <div class="card">
+        <form id="createCat">
+          <div class="form-group">
+            <label for="new-name">Название</label>
+            <input id="new-name" type="text" placeholder="Например: Новости">
+          </div>
+          <div class="form-group">
+            <label for="new-desc">Описание</label>
+            <input id="new-desc" type="text" placeholder="Описание категории">
+          </div>
+          <div class="form-group">
+            <label for="new-order">Порядок</label>
+            <input id="new-order" type="number" value="0">
+          </div>
+          <button type="submit" class="btn">Создать</button>
+        </form>
+      </div>
+    </div>
+
+    <div class="card">
+      <h2 style="margin-bottom:1rem;">Управление ролью пользователя</h2>
+      <div class="card">
+        <form id="findUsers" style="margin-bottom:1rem;">
+          <div class="form-group">
+            <label for="user-q">Поиск (email или имя)</label>
+            <input id="user-q" type="text" placeholder="example@mail.com или username">
+          </div>
+          <button type="submit" class="btn btn-secondary">Найти</button>
+        </form>
+        <div id="user-results" class="topic-list"></div>
+      </div>
+    </div>
+  </main>
+
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script>
+    const token = localStorage.getItem('jwt');
+    const user = JSON.parse(localStorage.getItem('user')||'null');
+    if (!token || !user || user.role !== 'admin') { alert('Только для администраторов'); window.location.href='index.html'; }
+
+    async function loadCats(){
+      const res = await fetch(api('/api/forum/categories'));
+      const cats = await res.json();
+      const list = document.getElementById('cat-list');
+      list.innerHTML = cats.map(c => `
+        <div class="topic-item">
+          <div class="topic-info" style="width:100%">
+            <input id="name-${c._id}" value="${c.name}" style="width:100%; margin-bottom:0.25rem;"/>
+            <input id="desc-${c._id}" value="${c.description||''}" style="width:100%; margin-bottom:0.25rem;"/>
+            <input id="order-${c._id}" type="number" value="${c.order||0}" style="width:100%;"/>
+          </div>
+          <div>
+            <button class="btn btn-secondary" onclick="updateCat('${c._id}')">Сохранить</button>
+            <button class="btn" style="background:linear-gradient(135deg,#ef4444,#dc2626);" onclick="deleteCat('${c._id}')">Удалить</button>
+          </div>
+        </div>
+      `).join('');
+    }
+    loadCats();
+
+    window.updateCat = async function(id){
+      const name = document.getElementById(`name-${id}`).value;
+      const description = document.getElementById(`desc-${id}`).value;
+      const order = Number(document.getElementById(`order-${id}`).value||0);
+      const res = await fetch(api(`/api/forum/categories/${id}`), { method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body: JSON.stringify({ name, description, order })});
+      if (!res.ok) alert('Ошибка сохранения');
+    }
+
+    window.deleteCat = async function(id){
+      if (!confirm('Удалить категорию и все темы?')) return;
+      const res = await fetch(api(`/api/forum/categories/${id}`), { method:'DELETE', headers:{'Authorization':`Bearer ${token}`} });
+      if (res.ok) loadCats(); else alert('Ошибка удаления');
+    }
+
+    const createCat = document.getElementById('createCat');
+    if (createCat) createCat.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const name = document.getElementById('new-name').value.trim();
+      const description = document.getElementById('new-desc').value.trim();
+      const order = Number(document.getElementById('new-order').value||0);
+      if (!name) return alert('Введите название');
+      const res = await fetch(api('/api/forum/categories'), { method:'POST', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body: JSON.stringify({ name, description, order })});
+      if (res.ok) { document.getElementById('new-name').value=''; document.getElementById('new-desc').value=''; loadCats(); } else alert('Ошибка создания');
+    });
+
+    // Users search and role update
+    const findUsers = document.getElementById('findUsers');
+    if (findUsers) findUsers.addEventListener('submit', async (e)=>{
+      e.preventDefault();
+      const q = document.getElementById('user-q').value.trim();
+      const res = await fetch(api(`/api/admin/users?q=${encodeURIComponent(q)}`), { headers:{'Authorization':`Bearer ${token}`}});
+      const users = await res.json();
+      const box = document.getElementById('user-results');
+      box.innerHTML = users.map(u => `
+        <div class="topic-item">
+          <div class="topic-info">
+            <h3>${u.username} <span style="color:#64748b; font-weight:400">(${u.email})</span></h3>
+            <p>Роль: ${u.role}</p>
+          </div>
+          <div>
+            <select id="role-${u._id}" class="btn-secondary" style="padding:0.5rem 0.75rem; border-radius:0.5rem;">
+              <option value="user" ${u.role==='user'?'selected':''}>user</option>
+              <option value="moderator" ${u.role==='moderator'?'selected':''}>moderator</option>
+              <option value="admin" ${u.role==='admin'?'selected':''}>admin</option>
+            </select>
+            <button class="btn" onclick="saveRole('${u._id}')">Сохранить</button>
+          </div>
+        </div>
+      `).join('');
+    });
+
+    window.saveRole = async function(userId){
+      const role = document.getElementById(`role-${userId}`).value;
+      const res = await fetch(api(`/api/admin/users/${userId}/role`), { method:'PUT', headers:{'Content-Type':'application/json','Authorization':`Bearer ${token}`}, body: JSON.stringify({ role }) });
+      if (!res.ok) alert('Ошибка обновления роли');
+    }
+  </script>
+</body>
+</html>
+
+

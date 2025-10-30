@@ -1,0 +1,130 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Black Dynasty Forum</title>
+  <link rel="icon" type="image/png" href="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E">
+  <link rel="stylesheet" href="assets/css/style.css">
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+  <header>
+    <div class="header-content">
+      <div class="logo-container">
+        <img src="https://scontent.fsof9-1.fna.fbcdn.net/v/t39.30808-6/571988370_841740614988641_4931287812958960179_n.jpg?_nc_cat=104&ccb=1-7&_nc_sid=127cfc&_nc_ohc=JSd4-ITOjgcQ7kNvwFOqkQ7&_nc_oc=Adm_e5aA5WU9eof9veIHiA52McHekVzSnblE7bv-L7OFklS5WjRcvem54mQAd-KT28U&_nc_zt=23&_nc_ht=scontent.fsof9-1.fna&_nc_gid=GAzQPtc-5TrDnaGzgUezNQ&oh=00_AfcVmM5L42RcWnUER1_2J0zgV8vq1e5XdjZmY-k6kEZ6JA&oe=6901C55E" alt="Black Dynasty Logo" class="logo">
+        <h1>Форум Black Dynasty</h1>
+      </div>
+      <nav>
+        <a href="login.html" class="nav-link">Войти</a>
+        <a href="register.html" class="nav-link">Регистрация</a>
+      </nav>
+    </div>
+  </header>
+
+  <main>
+    <div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:center;gap:1rem;">
+        <h2 style="margin-bottom: 1rem; font-size: 1.875rem; background: linear-gradient(135deg, #6366f1, #4f46e5); -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;">Категории форума</h2>
+        <div>
+          <input id="search-input" type="text" placeholder="Поиск по темам..." style="padding:0.5rem 0.75rem;border-radius:0.5rem;border:1px solid rgba(255,255,255,0.1);background:rgba(255,255,255,0.06);color:#fff;"/>
+          <button id="search-btn" class="btn" style="margin-left:0.5rem;">Поиск</button>
+        </div>
+      </div>
+      <div id="categories" class="topic-list"></div>
+      <div id="no-categories" class="message" style="display:none;color:#cbd5e1;">Категории отсутствуют. Создайте первую категорию ниже.</div>
+      <div id="category-form-card" class="card" style="display:none; margin-top:1rem;">
+        <form id="categoryForm">
+          <div class="form-group">
+            <label for="cat-name">Название категории</label>
+            <input id="cat-name" type="text" placeholder="Например: Общие обсуждения"/>
+          </div>
+          <div class="form-group">
+            <label for="cat-desc">Описание</label>
+            <input id="cat-desc" type="text" placeholder="Короткое описание"/>
+          </div>
+          <button type="submit" class="btn">Создать категорию</button>
+        </form>
+      </div>
+      <div id="search-results" class="topic-list"></div>
+      <div id="search-pagination" class="buttons" style="margin-top:1rem;"></div>
+    </div>
+
+    <div class="card glass-card" id="guest-message">
+      <h3 style="margin-bottom: 1rem; color: #f59e0b;">Добро пожаловать на форум Black Dynasty!</h3>
+      <p style="color: #cbd5e1; line-height: 1.6;">
+        Здесь вы можете обсуждать игровые стратегии, делиться опытом, получать помощь от сообщества 
+        и просто общаться с другими игроками. Для участия в обсуждениях необходимо 
+        <a href="register.html" style="color: #6366f1; text-decoration: none;">зарегистрироваться</a> 
+        или 
+        <a href="login.html" style="color: #6366f1; text-decoration: none;">войти в аккаунт</a>.
+      </p>
+    </div>
+  </main>
+  <script src="js/config.js"></script>
+  <script src="js/main.js"></script>
+  <script src="js/forum.js"></script>
+  <script>
+    const searchInput = document.getElementById('search-input');
+    const searchBtn = document.getElementById('search-btn');
+    const results = document.getElementById('search-results');
+    const catList = document.getElementById('categories');
+    const noCats = document.getElementById('no-categories');
+    const catFormCard = document.getElementById('category-form-card');
+    const user = JSON.parse(localStorage.getItem('user') || 'null');
+    const token = localStorage.getItem('jwt');
+    const isModerator = user && (user.role === 'admin' || user.role === 'moderator');
+    if (catFormCard && isModerator) { catFormCard.style.display = 'block'; }
+    setTimeout(() => { if (catList && catList.children.length === 0 && noCats) { noCats.style.display = 'block'; } }, 400);
+    if (searchBtn) {
+      searchBtn.addEventListener('click', async () => {
+        const q = (searchInput.value||'').trim();
+        const page = Number(searchInput.dataset.page || '1');
+        if (!q) { results.innerHTML = ''; return; }
+        const res = await fetch(api(`/api/forum/search?q=${encodeURIComponent(q)}&page=${page}`));
+        const data = await res.json();
+        const items = data.items || [];
+        const total = data.total || 0;
+        const cur = data.page || 1;
+        const pageSize = data.pageSize || 20;
+        results.innerHTML = items.map(t => `
+          <div class="topic-item" onclick="window.location.href='topic.html?topicId=${t._id}'">
+            <div class="topic-info">
+              <h3>${t.title}</h3>
+              <p>Категория: ${(t.category && t.category.name) || ''} • Автор: ${(t.author && t.author.username) || ''}</p>
+            </div>
+            <button class="btn">Открыть</button>
+          </div>
+        `).join('');
+        const pag = document.getElementById('search-pagination');
+        if (pag) {
+          const maxPage = Math.max(1, Math.ceil(total / pageSize));
+          pag.innerHTML = `
+            <button class="btn btn-secondary" ${cur<=1?'disabled':''} id="sp-prev">Назад</button>
+            <span style="color:#cbd5e1; align-self:center;">Стр. ${cur} из ${maxPage}</span>
+            <button class="btn btn-secondary" ${cur>=maxPage?'disabled':''} id="sp-next">Вперед</button>
+          `;
+          const prev = document.getElementById('sp-prev');
+          const next = document.getElementById('sp-next');
+          if (prev) prev.onclick = () => { searchInput.dataset.page = String(cur - 1); searchBtn.click(); };
+          if (next) next.onclick = () => { searchInput.dataset.page = String(cur + 1); searchBtn.click(); };
+        }
+      });
+    }
+    const categoryForm = document.getElementById('categoryForm');
+    if (categoryForm) {
+      categoryForm.addEventListener('submit', async (e) => {
+        e.preventDefault();
+        const name = document.getElementById('cat-name').value.trim();
+        const description = document.getElementById('cat-desc').value.trim();
+        if (!name) return alert('Введите название категории');
+        try {
+          const res = await fetch(api('/api/forum/categories'), { method:'POST', headers:{ 'Content-Type':'application/json', 'Authorization': `Bearer ${token}` }, body: JSON.stringify({ name, description }) });
+          const data = await res.json();
+          if (res.ok) { window.location.reload(); } else { alert(data.message || 'Ошибка создания категории'); }
+        } catch(_) { alert('Ошибка сети'); }
+      });
+    }
+  </script>
+</body>
+</html>
